@@ -1,0 +1,7 @@
+node_modules/
+.env
+api-tests/newman-reports/*
+!api-tests/newman-reports/.gitkeep
+playwright-report/
+test-results/
+.DS_Store
