@@ -1,0 +1,31 @@
+{
+  "name": "qa-portfolio-automationexercise",
+  "version": "1.0.0",
+  "description": "API and UI test automation for AutomationExercise.com",
+  "scripts": {
+    "test:api": "newman run api-tests/AutomationExercise.postman_collection.json -e api-tests/AutomationExercise.postman_environment.json -r cli,htmlextra --reporter-htmlextra-export api-tests/newman-reports/report.html"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sergeyshamin-code/qa-portfolio-automationexercise.git"
+  },
+  "keywords": [
+    "qa",
+    "automation",
+    "postman",
+    "newman",
+    "playwright"
+  ],
+  "author": "Sergey Shamin",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/sergeyshamin-code/qa-portfolio-automationexercise/issues"
+  },
+  "homepage": "https://github.com/sergeyshamin-code/qa-portfolio-automationexercise#readme",
+  "devDependencies": {
+    "newman": "^6.2.2",
+    "newman-reporter-htmlextra": "^1.23.1"
+  },
+  "private": true
+}
