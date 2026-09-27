@@ -30,10 +30,37 @@ npm run test:api
 
 This runs the collection with Newman against `api-tests/AutomationExercise.postman_environment.json` and writes an HTML report to `api-tests/newman-reports/report.html` (git-ignored; generated on every run).
 
+## UI Tests
+
+Playwright tests covering 5 of the site's [documented test cases](https://automationexercise.com/test_cases), using the Page Object pattern (`ui-tests/pages/`):
+
+- Register a new user account (and delete it afterwards)
+- Login with incorrect credentials
+- Search for a product
+- Add products to the cart as a guest
+- A full checkout journey: log in, add to cart, check out, pay, get a confirmed order — using a throwaway account created via the API (see `ui-tests/fixtures/apiUser.ts`), deleted again at the end
+
+The site serves real ads and a cookie-consent dialog through Google's ad stack, which would otherwise intercept clicks unpredictably; `ui-tests/fixtures/base.ts` blocks that traffic at the network level so tests run against the site's actual functionality instead of racing its ad timing.
+
+**Setup:**
+
+```bash
+npm install
+npx playwright install chromium
+```
+
+**Run:**
+
+```bash
+npm run test:ui
+```
+
+Add `--ui` for Playwright's interactive UI mode, or `--headed` to watch the browser. `npm run test:ui:report` opens the last HTML report (git-ignored; generated on every run).
+
 ## Roadmap
 
 - [x] **Phase 0 — Setup:** repository structure, `.gitignore`, `.env.example`, README
 - [x] **Phase 1 — API tests:** Postman collection covering the public API endpoints, run with Newman
-- [ ] **Phase 2 — UI tests:** Playwright tests using the Page Object pattern
+- [x] **Phase 2 — UI tests:** Playwright tests using the Page Object pattern
 - [ ] **Phase 3 — CI:** GitHub Actions workflow running API and UI tests on every push
 - [ ] **Phase 4 — Reporting and docs:** test reports, screenshots, final README
