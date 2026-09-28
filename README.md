@@ -1,5 +1,7 @@
 # QA Portfolio: AutomationExercise
 
+[![Tests](https://github.com/sergeyshamin-code/qa-portfolio-automationexercise/actions/workflows/tests.yml/badge.svg)](https://github.com/sergeyshamin-code/qa-portfolio-automationexercise/actions/workflows/tests.yml)
+
 API and UI test automation for [AutomationExercise.com](https://automationexercise.com), a demo e-commerce site built for practicing test automation.
 
 > Work in progress. This README is a placeholder and will be expanded as each phase is completed.
@@ -57,10 +59,14 @@ npm run test:ui
 
 Add `--ui` for Playwright's interactive UI mode, or `--headed` to watch the browser. `npm run test:ui:report` opens the last HTML report (git-ignored; generated on every run).
 
+## CI
+
+[`.github/workflows/tests.yml`](.github/workflows/tests.yml) runs on every push and pull request to `main`: the API suite (Newman) and the UI suite (Playwright/Chromium) run as two parallel jobs, each uploading its HTML report as a downloadable build artifact.
+
 ## Roadmap
 
 - [x] **Phase 0 — Setup:** repository structure, `.gitignore`, `.env.example`, README
 - [x] **Phase 1 — API tests:** Postman collection covering the public API endpoints, run with Newman
 - [x] **Phase 2 — UI tests:** Playwright tests using the Page Object pattern
-- [ ] **Phase 3 — CI:** GitHub Actions workflow running API and UI tests on every push
+- [x] **Phase 3 — CI:** GitHub Actions workflow running API and UI tests on every push
 - [ ] **Phase 4 — Reporting and docs:** test reports, screenshots, final README
