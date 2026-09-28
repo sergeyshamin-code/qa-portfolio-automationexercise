@@ -39,4 +39,24 @@ export class CartPage {
   removeButton(productId: number): Locator {
     return this.row(productId).locator('.cart_delete a');
   }
+
+  /**
+   * Clicks "Proceed To Checkout" and waits for its effect: either the
+   * login/register modal (guest) or a direct navigation to /checkout
+   * (already logged in). Retries the click a couple of times — on a slower
+   * machine (e.g. a CI runner with fewer CPUs than a dev laptop) the click
+   * can fire before the site's own JS has finished attaching its handler,
+   * so nothing visibly happens the first time.
+   */
+  async proceedToCheckout() {
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      await this.proceedToCheckoutButton.click();
+      const reachedCheckout = await Promise.race([
+        this.checkoutModalLoginLink.waitFor({ state: 'visible', timeout: 5000 }).then(() => true),
+        this.page.waitForURL(/\/checkout$/, { timeout: 5000 }).then(() => true),
+      ]).catch(() => false);
+      if (reachedCheckout) return;
+    }
+    throw new Error('"Proceed To Checkout" produced neither the login modal nor a navigation to /checkout after 3 attempts');
+  }
 }

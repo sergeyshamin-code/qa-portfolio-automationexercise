@@ -40,14 +40,14 @@ test.describe('place order after logging in', () => {
     await home.addProductToCartByIndex(0);
     await home.goToCartFromModal();
 
-    await cart.proceedToCheckoutButton.click();
+    await cart.proceedToCheckout();
     await cart.checkoutModalLoginLink.click();
     await signupLogin.login(user.email, user.password);
 
     await expect(home.loggedInAsText).toContainText(user.name);
 
     await home.cartLink.click();
-    await cart.proceedToCheckoutButton.click();
+    await cart.proceedToCheckout();
     await expect(page).toHaveURL(/\/checkout$/);
 
     await checkout.orderCommentTextarea.fill('QA portfolio automated order — please ignore.');
