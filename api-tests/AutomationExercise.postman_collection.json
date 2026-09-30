@@ -6,6 +6,18 @@
   },
   "variable": [
     {
+      "key": "baseUrl",
+      "value": "https://automationexercise.com"
+    },
+    {
+      "key": "name",
+      "value": "QA Portfolio User"
+    },
+    {
+      "key": "password",
+      "value": "Test@12345"
+    },
+    {
       "key": "email",
       "value": ""
     }
@@ -762,6 +774,60 @@
               "path": [
                 "api",
                 "verifyLogin"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Data-driven: Search Product",
+      "description": "Same request, run once per row of api-tests/data/search-terms.json (newman -d). Each row also encodes its own expected outcome (expect_results), not just the input — some search terms legitimately return zero matches, and the test should say so is correct, not fail.",
+      "item": [
+        {
+          "name": "POST To Search Product — {{search_term}}",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP transport status is 200', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test('responseCode in body is 200', () => pm.expect(body.responseCode).to.eql(200));",
+                  "const term = pm.iterationData.get('search_term');",
+                  "const expectResults = pm.iterationData.get('expect_results');",
+                  "if (expectResults) {",
+                  "  pm.test(`products for \"${term}\" is non-empty`, () => pm.expect(body.products.length).to.be.above(0));",
+                  "  pm.test(`every result matches \"${term}\"`, () => body.products.forEach(p => pm.expect(JSON.stringify(p).toLowerCase()).to.include(term.toLowerCase())));",
+                  "} else {",
+                  "  pm.test(`products for \"${term}\" is empty`, () => pm.expect(body.products.length).to.eql(0));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "search_product",
+                  "value": "{{search_term}}",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/searchProduct",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "searchProduct"
               ]
             }
           }

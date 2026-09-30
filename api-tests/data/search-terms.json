@@ -1,0 +1,9 @@
+[
+  { "search_term": "top", "expect_results": true },
+  { "search_term": "dress", "expect_results": true },
+  { "search_term": "shirt", "expect_results": true },
+  { "search_term": "jeans", "expect_results": true },
+  { "search_term": "saree", "expect_results": true },
+  { "search_term": "tshirt", "expect_results": true },
+  { "search_term": "jacket", "expect_results": false }
+]

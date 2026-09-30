@@ -21,6 +21,8 @@ API and UI test automation for [AutomationExercise.com](https://automationexerci
 
 A Postman collection ([`api-tests/AutomationExercise.postman_collection.json`](api-tests/AutomationExercise.postman_collection.json)) covers the [public API](https://automationexercise.com/api_list): product and brand listings, product search, and the full user account lifecycle.
 
+The collection carries sensible default values (`baseUrl`, `name`, `password`) as collection variables, so it also runs standalone straight after importing it into Postman — no environment needs to be selected first. Importing and selecting [`api-tests/AutomationExercise.postman_environment.json`](api-tests/AutomationExercise.postman_environment.json) as well overrides those defaults and matches exactly what Newman/CI run.
+
 **Setup:**
 
 ```bash
@@ -34,6 +36,8 @@ npm run test:api
 ```
 
 Runs the collection with Newman against [`api-tests/AutomationExercise.postman_environment.json`](api-tests/AutomationExercise.postman_environment.json) and writes an HTML report to `api-tests/newman-reports/report.html` (git-ignored; regenerated on every run).
+
+**Data-driven example:** the "Data-driven: Search Product" folder runs the same request once per row of [`api-tests/data/search-terms.json`](api-tests/data/search-terms.json) via Newman's `-d` flag (`npm run test:api:data`). Each row also carries its *own* expected outcome (`expect_results`), not just an input — one term (`"jacket"`) legitimately returns zero matches, and the test asserts that's correct rather than failing on it. This folder is deliberately excluded from the default `test:api` run (it needs a data file to mean anything) via explicit `--folder` flags, not left to pass by coincidence.
 
 ## UI Tests
 

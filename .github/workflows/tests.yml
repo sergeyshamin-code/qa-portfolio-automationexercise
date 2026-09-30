@@ -25,6 +25,8 @@ jobs:
 
       - run: npm run test:api
 
+      - run: npm run test:api:data
+
       - name: Upload Newman report
         if: always()
         uses: actions/upload-artifact@v4

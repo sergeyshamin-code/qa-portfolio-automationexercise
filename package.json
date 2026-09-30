@@ -3,9 +3,10 @@
   "version": "1.0.0",
   "description": "API and UI test automation for AutomationExercise.com",
   "scripts": {
-    "test:api": "newman run api-tests/AutomationExercise.postman_collection.json -e api-tests/AutomationExercise.postman_environment.json -r cli,htmlextra --reporter-htmlextra-export api-tests/newman-reports/report.html",
+    "test:api": "newman run api-tests/AutomationExercise.postman_collection.json -e api-tests/AutomationExercise.postman_environment.json --folder \"Read-only endpoints\" --folder \"User account lifecycle\" -r cli,htmlextra --reporter-htmlextra-export api-tests/newman-reports/report.html",
     "test:ui": "playwright test",
-    "test:ui:report": "playwright show-report"
+    "test:ui:report": "playwright show-report",
+    "test:api:data": "newman run api-tests/AutomationExercise.postman_collection.json -e api-tests/AutomationExercise.postman_environment.json --folder \"Data-driven: Search Product\" -d api-tests/data/search-terms.json"
   },
   "repository": {
     "type": "git",
