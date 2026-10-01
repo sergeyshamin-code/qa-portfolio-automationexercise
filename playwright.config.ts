@@ -9,6 +9,10 @@ export default defineConfig({
   reporter: [
     ['list'],
     ['html', { outputFolder: 'playwright-report', open: 'never' }],
+    // Extra machine-readable output in CI only, parsed into the GitHub
+    // Actions job summary (see scripts/write-job-summary.js) — local runs
+    // are unaffected.
+    ...(process.env.CI ? ([['json', { outputFile: 'playwright-report/results.json' }]] as const) : []),
   ],
   use: {
     baseURL: process.env.AE_BASE_URL ?? 'https://automationexercise.com',

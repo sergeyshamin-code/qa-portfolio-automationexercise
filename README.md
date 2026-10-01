@@ -89,7 +89,11 @@ Add `--ui` for Playwright's interactive UI mode, or `--headed` to watch the brow
 
 ## CI
 
-[`.github/workflows/tests.yml`](.github/workflows/tests.yml) runs on every push and pull request to `main`: the API suite (Newman) and the UI suite (Playwright/Chromium) run as two parallel jobs, each uploading its HTML report as a downloadable build artifact.
+[`.github/workflows/tests.yml`](.github/workflows/tests.yml) runs on every push and pull request to `main`: the API suite (Newman) and the UI suite (Playwright/Chromium) run as two parallel jobs.
+
+- **Job summary:** each job parses its JSON reporter output and writes a pass/fail table straight into the Actions run's Summary tab ([`scripts/write-job-summary.js`](scripts/write-job-summary.js)) — the result is visible at a glance, with no download or extra click needed.
+- **Build artifacts:** each job also uploads its full HTML report (14-day retention), for a detailed look when something fails.
+- **Live report:** on every push to `main`, the Newman HTML report is published to GitHub Pages: **[sergeyshamin-code.github.io/qa-portfolio-automationexercise](https://sergeyshamin-code.github.io/qa-portfolio-automationexercise/)** — always reflects the latest run on `main`, no need to download an artifact or dig through Actions history to see it.
 
 ## Screenshots
 
@@ -113,6 +117,7 @@ ui-tests/
   tests/                   Playwright specs, one file per scenario
   fixtures/                Shared helpers: API user setup/teardown, ad blocking, cookie consent
 .github/workflows/         CI: tests.yml
+scripts/                   CI helper scripts (job summary parsing)
 docs/screenshots/          Report and CI screenshots (this README)
 ```
 

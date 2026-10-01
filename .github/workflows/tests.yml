@@ -27,6 +27,10 @@ jobs:
 
       - run: npm run test:api:data
 
+      - name: Write job summary
+        if: always()
+        run: node scripts/write-job-summary.js api
+
       - name: Upload Newman report
         if: always()
         uses: actions/upload-artifact@v4
@@ -52,6 +56,10 @@ jobs:
 
       - run: npm run test:ui
 
+      - name: Write job summary
+        if: always()
+        run: node scripts/write-job-summary.js ui
+
       - name: Upload Playwright report
         if: always()
         uses: actions/upload-artifact@v4
@@ -59,3 +67,32 @@ jobs:
           name: playwright-report
           path: playwright-report/
           retention-days: 14
+
+  publish-report:
+    name: Publish Newman report to GitHub Pages
+    needs: api-tests
+    # A custom `if:` on a job replaces the implicit success() check GitHub
+    # Actions would otherwise apply to `needs:` — it must be spelled out, or
+    # this job still runs (and fails confusingly downloading a nonexistent
+    # artifact) even when api-tests itself failed.
+    if: success() && github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      # peaceiris/actions-gh-pages pushes via the local .git checkout/remote
+      # — without this, there's no git repo in the workspace for it to push
+      # from at all, and the job fails with "No such remote: 'origin'".
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: newman-report
+          path: pages
+
+      - run: mv pages/report.html pages/index.html
+
+      - uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./pages
