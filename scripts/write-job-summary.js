@@ -22,9 +22,24 @@ function missingSection(label) {
   return `### ${label}\n\n_No report found — the run may have failed before producing output._\n`;
 }
 
+function corruptSection(label, error) {
+  return `### ⚠️ ${label}\n\n_Report file exists but couldn't be parsed (${error.message}) — likely truncated by an interrupted run._\n`;
+}
+
+/** Reads and JSON-parses a report file, returning null (never throwing) if it's missing, truncated, or otherwise unreadable — this step runs with `if: always()` specifically to survive earlier failures, so it must not itself crash the job. */
+function readJsonReport(path) {
+  if (!fs.existsSync(path)) return { report: null, error: null };
+  try {
+    return { report: JSON.parse(fs.readFileSync(path, 'utf8')), error: null };
+  } catch (error) {
+    return { report: null, error };
+  }
+}
+
 function newmanSection(path, label) {
-  if (!fs.existsSync(path)) return missingSection(label);
-  const report = JSON.parse(fs.readFileSync(path, 'utf8'));
+  const { report, error } = readJsonReport(path);
+  if (error) return corruptSection(label, error);
+  if (!report) return missingSection(label);
   const s = report.run.stats;
   const failed = s.assertions.failed;
   const icon = failed === 0 ? '✅' : '❌';
@@ -39,8 +54,9 @@ function newmanSection(path, label) {
 }
 
 function playwrightSection(path, label) {
-  if (!fs.existsSync(path)) return missingSection(label);
-  const report = JSON.parse(fs.readFileSync(path, 'utf8'));
+  const { report, error } = readJsonReport(path);
+  if (error) return corruptSection(label, error);
+  if (!report) return missingSection(label);
   const s = report.stats;
   const failed = s.unexpected;
   const icon = failed === 0 ? '✅' : '❌';

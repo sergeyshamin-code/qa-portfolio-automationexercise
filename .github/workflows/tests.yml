@@ -71,7 +71,11 @@ jobs:
   publish-report:
     name: Publish Newman report to GitHub Pages
     needs: api-tests
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    # A custom `if:` on a job replaces the implicit success() check GitHub
+    # Actions would otherwise apply to `needs:` — it must be spelled out, or
+    # this job still runs (and fails confusingly downloading a nonexistent
+    # artifact) even when api-tests itself failed.
+    if: success() && github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
     permissions:
       contents: write
