@@ -47,7 +47,14 @@ Data-driven folders are prefixed **`DDT:`** (e.g. `DDT: Search Product`), to tel
 npm run test:api:data
 ```
 
-Runs once per row of [`api-tests/data/search-terms.json`](api-tests/data/search-terms.json) via Newman's `-d` flag — 7 terms, each carrying its *own* expected outcome (`expect_results`), not just an input. One term (`"jacket"`) legitimately returns zero matches, and the test asserts that's correct rather than failing on it.
+Runs once per row of [`api-tests/data/search-terms.json`](api-tests/data/search-terms.json) via Newman's `-d` flag — 19 terms, each carrying its *own* expected outcome (`expect_results`), not just an input. Beyond plain happy-path words, the rows cover distinct equivalence classes, each verified live before being added:
+
+- **Case-insensitivity** — `"TOP"` matches the same 14 products as `"top"`.
+- **No input trimming** — `"  top  "` (padded) matches nothing; the API doesn't sanitize whitespace.
+- **Empty string** — matches the *entire* catalog (34/34): an empty substring is trivially contained in every product, not an error.
+- **Substring, not tokenized search** — `"blue top"` matches the one product literally named "Blue Top", but `"top dress"` (two individually-valid words concatenated) matches nothing: the API matches one literal substring, not "contains every word".
+- **Field scope** — `"500"` and `"H&M"` both match nothing, even though a price like "Rs. 500" and the brand "H&M" appear in the data; search only looks at name/category, not price or brand.
+- **Robustness** — an XSS-shaped string, a SQLi-shaped string, a 200-character string, Cyrillic text, a literal `&` (a form-encoding separator character), and a literal `%` (the URL-encoding escape character itself) all return a normal empty `200` response, not an error.
 
 It's deliberately **excluded** from the default `npm run test:api` run: `Read-only endpoints / 5.` already exercises the same endpoint's happy path (`search_term: "top"`) as part of the complete, numbered API coverage — including it in both commands would just fire the same live HTTP call twice. The DDT folder's reason to exist is the full parameterized matrix, which only `test:api:data` exercises; `npm run test:api` stays each request's single definitive run.
 
