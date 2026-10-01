@@ -1,27 +1,12 @@
 {
   "info": {
+    "_postman_id": "a5f81a53-ba72-4a8e-8977-6930e2d34ec7",
     "name": "AutomationExercise API",
     "description": "API tests for https://automationexercise.com/api_list. The API always returns HTTP 200; the real status code is \"responseCode\" in the JSON body, so assertions check the body.",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "28422773",
+    "_collection_link": "https://go.postman.co/collection/28422773-a5f81a53-ba72-4a8e-8977-6930e2d34ec7?source=collection_link"
   },
-  "variable": [
-    {
-      "key": "baseUrl",
-      "value": "https://automationexercise.com"
-    },
-    {
-      "key": "name",
-      "value": "QA Portfolio User"
-    },
-    {
-      "key": "password",
-      "value": "Test@12345"
-    },
-    {
-      "key": "email",
-      "value": ""
-    }
-  ],
   "item": [
     {
       "name": "Read-only endpoints",
@@ -56,7 +41,8 @@
                 "productsList"
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "2. POST To All Products List (405)",
@@ -87,7 +73,8 @@
                 "productsList"
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "3. GET All Brands List",
@@ -119,7 +106,8 @@
                 "brandsList"
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "4. PUT To All Brands List (405)",
@@ -150,7 +138,8 @@
                 "brandsList"
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "5. POST To Search Product",
@@ -192,7 +181,8 @@
                 "searchProduct"
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "6. POST To Search Product without search_product (400)",
@@ -223,7 +213,8 @@
                 "searchProduct"
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "8. POST To Verify Login without email (400)",
@@ -264,7 +255,8 @@
                 "verifyLogin"
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "9. DELETE To Verify Login (405)",
@@ -295,7 +287,8 @@
                 "verifyLogin"
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "10. POST To Verify Login with invalid details (404)",
@@ -341,7 +334,8 @@
                 "verifyLogin"
               ]
             }
-          }
+          },
+          "response": []
         }
       ]
     },
@@ -477,7 +471,8 @@
                 "createAccount"
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "7. POST To Verify Login with valid details",
@@ -523,7 +518,8 @@
                 "verifyLogin"
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "14. GET user account detail by email",
@@ -563,7 +559,8 @@
                 }
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "13. PUT METHOD To Update User Account",
@@ -684,7 +681,8 @@
                 "updateAccount"
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "12. DELETE METHOD To Delete User Account",
@@ -730,7 +728,8 @@
                 "deleteAccount"
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "7b. POST To Verify Login after account deletion (404)",
@@ -776,33 +775,23 @@
                 "verifyLogin"
               ]
             }
-          }
+          },
+          "response": []
         }
       ]
     },
     {
-      "name": "Data-driven: Search Product",
-      "description": "Same request, run once per row of api-tests/data/search-terms.json (newman -d). Each row also encodes its own expected outcome (expect_results), not just the input — some search terms legitimately return zero matches, and the test should say so is correct, not fail.",
+      "name": "DDT: Search Product",
       "item": [
         {
-          "name": "POST To Search Product — {{search_term}}",
+          "name": "5. POST To Search Product — {{search_term}}",
           "event": [
             {
               "listen": "test",
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('HTTP transport status is 200', () => pm.response.to.have.status(200));",
-                  "const body = pm.response.json();",
-                  "pm.test('responseCode in body is 200', () => pm.expect(body.responseCode).to.eql(200));",
-                  "const term = pm.iterationData.get('search_term');",
-                  "const expectResults = pm.iterationData.get('expect_results');",
-                  "if (expectResults) {",
-                  "  pm.test(`products for \"${term}\" is non-empty`, () => pm.expect(body.products.length).to.be.above(0));",
-                  "  pm.test(`every result matches \"${term}\"`, () => body.products.forEach(p => pm.expect(JSON.stringify(p).toLowerCase()).to.include(term.toLowerCase())));",
-                  "} else {",
-                  "  pm.test(`products for \"${term}\" is empty`, () => pm.expect(body.products.length).to.eql(0));",
-                  "}"
+                  "pm.test('HTTP transport status is 200', () => pm.response.to.have.status(200));\nconst body = pm.response.json();\npm.test('responseCode in body is 200', () => pm.expect(body.responseCode).to.eql(200));\nconst term = pm.variables.get('search_term');\nconst expectResults = pm.variables.get('expect_results');\nif (String(expectResults) === \"true\") {\n  pm.test(`products for \"${term}\" is non-empty`, () => pm.expect(body.products.length).to.be.above(0));\n  pm.test(`every result matches \"${term}\"`, () => body.products.forEach(p => pm.expect(JSON.stringify(p).toLowerCase()).to.include(term.toLowerCase())));\n} else {\n  pm.test(`products for \"${term}\" is empty`, () => pm.expect(body.products.length).to.eql(0));\n}"
                 ]
               }
             }
@@ -815,8 +804,7 @@
               "urlencoded": [
                 {
                   "key": "search_product",
-                  "value": "{{search_term}}",
-                  "type": "text"
+                  "value": "{{search_term}}"
                 }
               ]
             },
@@ -830,9 +818,37 @@
                 "searchProduct"
               ]
             }
-          }
+          },
+          "response": []
         }
-      ]
+      ],
+      "description": "Same request, run once per row of api-tests/data/search-terms.json (newman -d). Each row also encodes its own expected outcome (expect_results), not just the input — some search terms legitimately return zero matches, and the test should say so is correct, not fail."
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://automationexercise.com"
+    },
+    {
+      "key": "name",
+      "value": "QA Portfolio User"
+    },
+    {
+      "key": "password",
+      "value": "Test@12345"
+    },
+    {
+      "key": "email",
+      "value": ""
+    },
+    {
+      "key": "search_term",
+      "value": "top"
+    },
+    {
+      "key": "expect_results",
+      "value": "true"
     }
   ]
 }
