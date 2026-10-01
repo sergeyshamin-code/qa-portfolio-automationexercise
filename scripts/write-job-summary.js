@@ -40,34 +40,46 @@ function newmanSection(path, label) {
   const { report, error } = readJsonReport(path);
   if (error) return corruptSection(label, error);
   if (!report) return missingSection(label);
-  const s = report.run.stats;
-  const failed = s.assertions.failed;
-  const icon = failed === 0 ? '✅' : '❌';
-  return [
-    `### ${icon} ${label}`,
-    '',
-    '| Requests | Assertions | Failed |',
-    '|---|---|---|',
-    `| ${s.requests.total} | ${s.assertions.total} | ${failed} |`,
-    '',
-  ].join('\n');
+  // A validly-parsed-but-unexpectedly-shaped report (e.g. {} from a run that
+  // errored before writing real stats, or a future Newman schema change)
+  // would otherwise throw here and defeat this step's if: always() purpose
+  // — same resilience goal as the JSON.parse guard above, same fallback.
+  try {
+    const s = report.run.stats;
+    const failed = s.assertions.failed;
+    const icon = failed === 0 ? '✅' : '❌';
+    return [
+      `### ${icon} ${label}`,
+      '',
+      '| Requests | Assertions | Failed |',
+      '|---|---|---|',
+      `| ${s.requests.total} | ${s.assertions.total} | ${failed} |`,
+      '',
+    ].join('\n');
+  } catch (shapeError) {
+    return corruptSection(label, shapeError);
+  }
 }
 
 function playwrightSection(path, label) {
   const { report, error } = readJsonReport(path);
   if (error) return corruptSection(label, error);
   if (!report) return missingSection(label);
-  const s = report.stats;
-  const failed = s.unexpected;
-  const icon = failed === 0 ? '✅' : '❌';
-  return [
-    `### ${icon} ${label}`,
-    '',
-    '| Passed | Failed | Flaky | Skipped |',
-    '|---|---|---|---|',
-    `| ${s.expected} | ${failed} | ${s.flaky} | ${s.skipped} |`,
-    '',
-  ].join('\n');
+  try {
+    const s = report.stats;
+    const failed = s.unexpected;
+    const icon = failed === 0 ? '✅' : '❌';
+    return [
+      `### ${icon} ${label}`,
+      '',
+      '| Passed | Failed | Flaky | Skipped |',
+      '|---|---|---|---|',
+      `| ${s.expected} | ${failed} | ${s.flaky} | ${s.skipped} |`,
+      '',
+    ].join('\n');
+  } catch (shapeError) {
+    return corruptSection(label, shapeError);
+  }
 }
 
 const mode = process.argv[2];
