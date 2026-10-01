@@ -14,5 +14,8 @@
   { "search_term": "<script>alert(1)</script>", "expect_results": false },
   { "search_term": "' OR '1'='1", "expect_results": false },
   { "search_term": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "expect_results": false },
-  { "search_term": "платье", "expect_results": false }
+  { "search_term": "платье", "expect_results": false },
+  { "search_term": "H&M", "expect_results": false },
+  { "search_term": "top dress", "expect_results": false },
+  { "search_term": "100%", "expect_results": false }
 ]
