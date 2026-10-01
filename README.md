@@ -37,16 +37,23 @@ npm run test:api
 
 Runs the collection with Newman against [`api-tests/AutomationExercise.postman_environment.json`](api-tests/AutomationExercise.postman_environment.json) and writes an HTML report to `api-tests/newman-reports/report.html` (git-ignored; regenerated on every run). The collection also carries sensible defaults as collection-level variables, so it runs standalone straight after importing it into Postman — no environment needs to be selected first.
 
-### Data-driven testing
+### Data-driven testing (DDT)
 
-The "Data-driven: Search Product" folder runs the same `searchProduct` request, parameterized by `{{search_term}}`. It works two ways:
+Data-driven folders are prefixed **`DDT:`** (e.g. `DDT: Search Product`), to tell them apart at a glance from the numbered, one-case-per-endpoint folders above. The request inside is prefixed with the number of the official endpoint it exercises (`5. POST To Search Product — {{search_term}}`) — the same `5` as `Read-only endpoints / 5. POST To Search Product` — so it's traceable to the endpoint it's testing a fuller input matrix for.
 
-- **`npm run test:api` (default):** runs once, against the collection's default variables (`search_term: "top"`) — just another ordinary case alongside the rest of the suite.
-- **`npm run test:api:data`:** runs once per row of [`api-tests/data/search-terms.json`](api-tests/data/search-terms.json) via Newman's `-d` flag — the full, parameterized matrix (7 terms).
+`DDT: Search Product` runs the same `searchProduct` request, parameterized by `{{search_term}}`:
 
-Each data row carries its *own* expected outcome (`expect_results`), not just an input — one term (`"jacket"`) legitimately returns zero matches, and the test asserts that's correct rather than failing on it. The test script reads both the search term and the expected outcome with `pm.variables.get(...)`, which resolves across scopes (iteration data → environment → collection defaults) — so the same script works whether or not a data file is supplied. One subtlety: Postman stores collection/environment variables as strings, but a value coming from a JSON data file (`-d`) keeps its real JSON type (`true`/`false`, a boolean) — comparing with `String(expectResults) === "true"` handles both consistently; a plain `==` comparison does not (`true == "true"` is `false` in JavaScript).
+```bash
+npm run test:api:data
+```
 
-**Adding another data-driven scenario:** this collection follows the common Postman pattern of one folder per scenario, each with its own data file and its own Newman invocation (Newman only accepts a single `-d` file per run, so scenarios with different datasets can't share one command). To add one — e.g. a "Data-driven: Verify Login" folder — add a `api-tests/data/<scenario>.json` file, a matching folder + request in the collection, and a dedicated `test:api:data:<scenario>` npm script (plus a CI step, if it should run there too).
+Runs once per row of [`api-tests/data/search-terms.json`](api-tests/data/search-terms.json) via Newman's `-d` flag — 7 terms, each carrying its *own* expected outcome (`expect_results`), not just an input. One term (`"jacket"`) legitimately returns zero matches, and the test asserts that's correct rather than failing on it.
+
+It's deliberately **excluded** from the default `npm run test:api` run: `Read-only endpoints / 5.` already exercises the same endpoint's happy path (`search_term: "top"`) as part of the complete, numbered API coverage — including it in both commands would just fire the same live HTTP call twice. The DDT folder's reason to exist is the full parameterized matrix, which only `test:api:data` exercises; `npm run test:api` stays each request's single definitive run.
+
+The test script reads both the search term and the expected outcome with `pm.variables.get(...)`, which resolves across scopes (iteration data → environment → collection defaults). The collection also carries `search_term`/`expect_results` as defaults, so the request still runs standalone with a single sensible case straight from Postman's "Send" button — without needing the data file or `-d` at all. One subtlety: Postman stores collection/environment variables as strings, but a value coming from a JSON data file (`-d`) keeps its real JSON type (`true`/`false`, a boolean) — comparing with `String(expectResults) === "true"` handles both consistently; a plain `==` comparison does not (`true == "true"` is `false` in JavaScript).
+
+**Adding another DDT scenario:** this collection follows the common Postman pattern of one folder per scenario, each with its own data file and its own Newman invocation (Newman only accepts a single `-d` file per run, so scenarios with different datasets can't share one command). To add one — e.g. a `DDT: Verify Login` folder, numbered to match endpoint `7`/`8` — add a `api-tests/data/<scenario>.json` file, a matching folder + numbered request in the collection, and a dedicated `test:api:data:<scenario>` npm script (plus a CI step, if it should run there too). If the folder's default case would duplicate an existing numbered request's happy path, leave it out of the default `test:api` run, same as here.
 
 ## UI Tests
 

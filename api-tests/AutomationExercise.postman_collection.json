@@ -781,10 +781,10 @@
       ]
     },
     {
-      "name": "Data-driven: Search Product",
+      "name": "DDT: Search Product",
       "item": [
         {
-          "name": "POST To Search Product — {{search_term}}",
+          "name": "5. POST To Search Product — {{search_term}}",
           "event": [
             {
               "listen": "test",
