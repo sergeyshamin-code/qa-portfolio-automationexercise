@@ -121,10 +121,20 @@ scripts/                   CI helper scripts (job summary parsing)
 docs/screenshots/          Report and CI screenshots (this README)
 ```
 
-## Roadmap
+## Project Plan
+
+This project was built with [Claude Code](https://claude.com/claude-code) following an explicit, phased plan, end to end:
 
 - [x] **Phase 0 — Setup:** repository structure, `.gitignore`, `.env.example`, README
 - [x] **Phase 1 — API tests:** Postman collection covering the public API endpoints, run with Newman
 - [x] **Phase 2 — UI tests:** Playwright tests using the Page Object pattern
 - [x] **Phase 3 — CI:** GitHub Actions workflow running API and UI tests on every push
 - [x] **Phase 4 — Reporting and docs:** test reports, screenshots, final README
+
+## Ongoing Enhancements
+
+With the initial plan complete, work continues incrementally rather than as further numbered phases — each change goes through its own branch, AI self-review, and pull request (see the repo's merged PRs for the history). Current focus areas:
+
+- **API tests:** broader data-driven coverage (equivalence classes, boundary values), beyond the existing [`DDT: Search Product`](#data-driven-testing-ddt) example.
+- **UI tests:** more of the site's [documented test cases](https://automationexercise.com/test_cases) beyond the 5 currently covered.
+- **Reporting:** the [live GitHub Pages report](#ci) and CI job summaries are the first step; next is tracking trends across runs rather than just the latest one.
