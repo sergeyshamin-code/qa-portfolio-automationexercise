@@ -47,14 +47,18 @@ Data-driven folders are prefixed **`DDT:`** (e.g. `DDT: Search Product`), to tel
 npm run test:api:data
 ```
 
-Runs once per row of [`api-tests/data/search-terms.json`](api-tests/data/search-terms.json) via Newman's `-d` flag — 19 terms, each carrying its *own* expected outcome (`expect_results`), not just an input. Beyond plain happy-path words, the rows cover distinct equivalence classes, each verified live before being added:
+Runs once per row of [`api-tests/data/search-terms.json`](api-tests/data/search-terms.json) via Newman's `-d` flag — 22 terms, each carrying its *own* expected outcome (`expect_results`), not just an input. Beyond plain happy-path words, the rows cover distinct equivalence classes, cross-checked against standard boundary-value-analysis / input-validation checklists ([ISTQB](https://www.softwaretestinghelp.com/what-is-boundary-value-analysis-and-equivalence-partitioning/), [OWASP](https://cheatsheetseries.owasp.org/cheatsheets/Input_Validation_Cheat_Sheet.html)) and verified live before being added:
 
 - **Case-insensitivity** — `"TOP"` matches the same 14 products as `"top"`.
 - **No input trimming** — `"  top  "` (padded) matches nothing; the API doesn't sanitize whitespace.
 - **Empty string** — matches the *entire* catalog (34/34): an empty substring is trivially contained in every product, not an error.
+- **Whitespace-only is not treated as empty** — `"   "` (spaces, no real content) matches nothing, unlike a genuinely empty string — a distinct outcome from the row above.
 - **Substring, not tokenized search** — `"blue top"` matches the one product literally named "Blue Top", but `"top dress"` (two individually-valid words concatenated) matches nothing: the API matches one literal substring, not "contains every word".
 - **Field scope** — `"500"` and `"H&M"` both match nothing, even though a price like "Rs. 500" and the brand "H&M" appear in the data; search only looks at name/category, not price or brand.
-- **Robustness** — an XSS-shaped string, a SQLi-shaped string, a 200-character string, Cyrillic text, a literal `&` (a form-encoding separator character), and a literal `%` (the URL-encoding escape character itself) all return a normal empty `200` response, not an error.
+- **Minimum-length boundary** — a single character (`"t"`) is accepted and matches normally (32 products), no minimum-length restriction.
+- **Robustness** — an XSS-shaped string, a SQLi-shaped string, a 200-character string, Cyrillic text, an embedded newline, a literal `&` (a form-encoding separator character), and a literal `%` (the URL-encoding escape character itself) all return a normal empty `200` response, not an error.
+
+**Deliberately not automated:** a literal null byte (`%00`) produces a real, interesting finding — `"top\0dress"` returns exactly 4 products (a strict subset of the 14 that match plain `"top"`), not 0, not 14, and not a crash. That's a different *mechanism* than simple substring matching (the backend evidently processes the null byte specially rather than just truncating the string, since truncating would reproduce the full 14), but pinning that exact count into an automated assertion would be testing an undocumented implementation detail rather than documented behavior — it could change for reasons unrelated to any real regression. Noted here as an exploratory finding rather than encoded as a brittle check.
 
 It's deliberately **excluded** from the default `npm run test:api` run: `Read-only endpoints / 5.` already exercises the same endpoint's happy path (`search_term: "top"`) as part of the complete, numbered API coverage — including it in both commands would just fire the same live HTTP call twice. The DDT folder's reason to exist is the full parameterized matrix, which only `test:api:data` exercises; `npm run test:api` stays each request's single definitive run.
 

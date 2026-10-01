@@ -17,5 +17,8 @@
   { "search_term": "платье", "expect_results": false },
   { "search_term": "H&M", "expect_results": false },
   { "search_term": "top dress", "expect_results": false },
-  { "search_term": "100%", "expect_results": false }
+  { "search_term": "100%", "expect_results": false },
+  { "search_term": "   ", "expect_results": false },
+  { "search_term": "top\ndress", "expect_results": false },
+  { "search_term": "t", "expect_results": true }
 ]
