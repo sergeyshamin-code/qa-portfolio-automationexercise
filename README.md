@@ -35,9 +35,18 @@ npm install
 npm run test:api
 ```
 
-Runs the collection with Newman against [`api-tests/AutomationExercise.postman_environment.json`](api-tests/AutomationExercise.postman_environment.json) and writes an HTML report to `api-tests/newman-reports/report.html` (git-ignored; regenerated on every run).
+Runs the collection with Newman against [`api-tests/AutomationExercise.postman_environment.json`](api-tests/AutomationExercise.postman_environment.json) and writes an HTML report to `api-tests/newman-reports/report.html` (git-ignored; regenerated on every run). The collection also carries sensible defaults as collection-level variables, so it runs standalone straight after importing it into Postman — no environment needs to be selected first.
 
-**Data-driven example:** the "Data-driven: Search Product" folder runs the same request once per row of [`api-tests/data/search-terms.json`](api-tests/data/search-terms.json) via Newman's `-d` flag (`npm run test:api:data`). Each row also carries its *own* expected outcome (`expect_results`), not just an input — one term (`"jacket"`) legitimately returns zero matches, and the test asserts that's correct rather than failing on it. This folder is deliberately excluded from the default `test:api` run (it needs a data file to mean anything) via explicit `--folder` flags, not left to pass by coincidence.
+### Data-driven testing
+
+The "Data-driven: Search Product" folder runs the same `searchProduct` request, parameterized by `{{search_term}}`. It works two ways:
+
+- **`npm run test:api` (default):** runs once, against the collection's default variables (`search_term: "top"`) — just another ordinary case alongside the rest of the suite.
+- **`npm run test:api:data`:** runs once per row of [`api-tests/data/search-terms.json`](api-tests/data/search-terms.json) via Newman's `-d` flag — the full, parameterized matrix (7 terms).
+
+Each data row carries its *own* expected outcome (`expect_results`), not just an input — one term (`"jacket"`) legitimately returns zero matches, and the test asserts that's correct rather than failing on it. The test script reads both the search term and the expected outcome with `pm.variables.get(...)`, which resolves across scopes (iteration data → environment → collection defaults) — so the same script works whether or not a data file is supplied. One subtlety: Postman stores collection/environment variables as strings, but a value coming from a JSON data file (`-d`) keeps its real JSON type (`true`/`false`, a boolean) — comparing with `String(expectResults) === "true"` handles both consistently; a plain `==` comparison does not (`true == "true"` is `false` in JavaScript).
+
+**Adding another data-driven scenario:** this collection follows the common Postman pattern of one folder per scenario, each with its own data file and its own Newman invocation (Newman only accepts a single `-d` file per run, so scenarios with different datasets can't share one command). To add one — e.g. a "Data-driven: Verify Login" folder — add a `api-tests/data/<scenario>.json` file, a matching folder + request in the collection, and a dedicated `test:api:data:<scenario>` npm script (plus a CI step, if it should run there too).
 
 ## UI Tests
 
@@ -81,7 +90,10 @@ Add `--ui` for Playwright's interactive UI mode, or `--headed` to watch the brow
 ## Project Structure
 
 ```
-api-tests/                 Postman collection, environment, Newman HTML reports (git-ignored)
+api-tests/
+  data/                     Data files for data-driven scenarios (one JSON file per scenario)
+  *.postman_collection.json / *.postman_environment.json
+  newman-reports/           HTML reports (git-ignored)
 ui-tests/
   pages/                   Page objects (HomePage, CartPage, CheckoutPage, ...)
   tests/                   Playwright specs, one file per scenario
