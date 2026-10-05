@@ -373,18 +373,6 @@
           "name": "14c. GET user account detail by non-existent email (404)",
           "event": [
             {
-              "listen": "prerequest",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "// A freshly-generated, run-unique email, never an existing account's —",
-                  "// unlike a hardcoded or \"garbage-looking\" string, which (confirmed live)",
-                  "// can coincidentally BE a real user's email on this shared public site.",
-                  "pm.collectionVariables.set('nonexistent_email', 'ae_notfound_' + Date.now() + '@example.com');"
-                ]
-              }
-            },
-            {
               "listen": "test",
               "script": {
                 "type": "text/javascript",
@@ -401,7 +389,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/getUserDetailByEmail?email={{nonexistent_email}}",
+              "raw": "{{baseUrl}}/api/getUserDetailByEmail?email={{unique_probe_email}}",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -412,7 +400,7 @@
               "query": [
                 {
                   "key": "email",
-                  "value": "{{nonexistent_email}}"
+                  "value": "{{unique_probe_email}}"
                 }
               ]
             }
@@ -422,16 +410,6 @@
         {
           "name": "13b. PUT METHOD To Update Non-Existent Account (404)",
           "event": [
-            {
-              "listen": "prerequest",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "// A freshly-generated, run-unique email — guaranteed never to match a real account.",
-                  "pm.collectionVariables.set('nonexistent_update_email', 'ae_update_notfound_' + Date.now() + '@example.com');"
-                ]
-              }
-            },
             {
               "listen": "test",
               "script": {
@@ -458,7 +436,7 @@
                 },
                 {
                   "key": "email",
-                  "value": "{{nonexistent_update_email}}",
+                  "value": "{{unique_probe_email}}",
                   "type": "text"
                 },
                 {
@@ -555,16 +533,6 @@
           "name": "12b. DELETE METHOD To Delete Non-Existent Account (404)",
           "event": [
             {
-              "listen": "prerequest",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "// A freshly-generated, run-unique email — guaranteed never to match a real account.",
-                  "pm.collectionVariables.set('nonexistent_delete_email', 'ae_delete_notfound_' + Date.now() + '@example.com');"
-                ]
-              }
-            },
-            {
               "listen": "test",
               "script": {
                 "type": "text/javascript",
@@ -585,7 +553,7 @@
               "urlencoded": [
                 {
                   "key": "email",
-                  "value": "{{nonexistent_delete_email}}",
+                  "value": "{{unique_probe_email}}",
                   "type": "text"
                 },
                 {
@@ -608,7 +576,8 @@
           },
           "response": []
         }
-      ]
+      ],
+      "description": "No request here ever mutates persistent data. Most are plain GETs or structural (missing-parameter/wrong-method) checks; a few (12b, 13b) use PUT/DELETE methods, but always against a freshly-generated, guaranteed non-existent account, so they 400/404 before touching anything real. \"Read-only\" describes the *effect*, not every HTTP verb used."
     },
     {
       "name": "User account lifecycle",
@@ -1260,6 +1229,22 @@
     {
       "key": "login_password",
       "value": "wrong-password"
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Shared across every request in the collection: a freshly-generated,",
+          "// run-unique email, guaranteed never to match a real account — used by",
+          "// any item that needs to probe a 'this account does not exist' case",
+          "// (14c, 12b, 13b) without risking a coincidental collision with a real",
+          "// stranger's account on this shared public site.",
+          "pm.collectionVariables.set('unique_probe_email', 'ae_notfound_' + Date.now() + '@example.com');"
+        ]
+      }
     }
   ]
 }
