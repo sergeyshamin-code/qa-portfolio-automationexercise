@@ -16,6 +16,7 @@ API and UI test automation for [AutomationExercise.com](https://automationexerci
 - **UI testing against a real, uncontrolled site:** AutomationExercise serves real ads, a cookie-consent dialog, and a randomly-timed full-page interstitial — all of which intercept clicks unpredictably. Rather than papering over that with `force` clicks, the suite blocks the ad stack at the network level (`ui-tests/fixtures/base.ts`) and retries actions that can race the site's own JS, so failures reflect real bugs, not ad timing.
 - **Hybrid API + UI setup:** the checkout test creates its throwaway user via the API (reusing Phase 1's request logic) instead of relying on a fixed, persistent account or a bare `.env` credential — it also deletes it afterwards on the public site.
 - **CI that was actually verified, not just written:** the workflow was tested live on a branch before merging, and a real CI-only failure (a click racing the site's JS, only visible on a slower runner) was diagnosed from its log and fixed — not guessed at.
+- **Knowing when *not* to automate something:** investigating `getUserDetailByEmail` for data-driven testing surfaced real other people's PII — "garbage" emails like `""` and `<script>alert(1)</script>` turned out to be real accounts other users registered on this shared public demo site. That made the endpoint's outcomes genuinely unpredictable (not a test design problem to engineer around), so it got two ordinary negative tests instead of a DDT matrix — see [the full reasoning](#why-not-every-parameterized-endpoint-got-a-ddt-folder).
 
 ## API Tests
 
@@ -64,7 +65,39 @@ It's deliberately **excluded** from the default `npm run test:api` run: `Read-on
 
 The test script reads both the search term and the expected outcome with `pm.variables.get(...)`, which resolves across scopes (iteration data → environment → collection defaults). The collection also carries `search_term`/`expect_results` as defaults, so the request still runs standalone with a single sensible case straight from Postman's "Send" button — without needing the data file or `-d` at all. One subtlety: Postman stores collection/environment variables as strings, but a value coming from a JSON data file (`-d`) keeps its real JSON type (`true`/`false`, a boolean) — comparing with `String(expectResults) === "true"` handles both consistently; a plain `==` comparison does not (`true == "true"` is `false` in JavaScript).
 
-**Adding another DDT scenario:** this collection follows the common Postman pattern of one folder per scenario, each with its own data file and its own Newman invocation (Newman only accepts a single `-d` file per run, so scenarios with different datasets can't share one command). To add one — e.g. a `DDT: Verify Login` folder, numbered to match endpoint `7`/`8` — add a `api-tests/data/<scenario>.json` file, a matching folder + numbered request in the collection, and a dedicated `test:api:data:<scenario>` npm script (plus a CI step, if it should run there too). If the folder's default case would duplicate an existing numbered request's happy path, leave it out of the default `test:api` run, same as here.
+#### `DDT: Verify Login`
+
+```bash
+npm run test:api:data:login
+```
+
+An auth-robustness matrix for endpoints `7`/`10` (verifyLogin): 8 rows of malformed/malicious email+password combinations ([`api-tests/data/verify-login.json`](api-tests/data/verify-login.json)) — empty-but-present values, SQLi/XSS-shaped email, a 200-character password, Cyrillic text, a padded email. Unlike `DDT: Search Product`, every single row expects the *same* outcome: a safe `404 "User not found!"`, never a crash or a different error shape. That's a deliberate, different kind of data-driven suite — proving one invariant holds across many adversarial inputs, rather than mapping inputs to varied outcomes.
+
+This is safe to run with made-up credentials specifically because matching here requires **both** email *and* password together — unlike `getUserDetailByEmail` (below), where email alone is the lookup key, a coincidental collision with a real stranger's account is not a realistic concern.
+
+#### `DDT: Create Account (missing required field)`
+
+```bash
+npm run test:api:data:create-account
+```
+
+Endpoint `11` (createAccount) takes 16 fields; verified live which are actually required — missing any of **name, email, password, firstname, lastname, address1, country, zipcode, state, city, mobile_number** (11 fields) returns `400` before anything is created, while the other 6 (title, birth_date/month/year, company, address2) are optional. One row per required field ([`api-tests/data/create-account-missing-field.json`](api-tests/data/create-account-missing-field.json)), each omitting a *different* one.
+
+This needed a technique beyond simple `{{variable}}` substitution: a **pre-request script** rebuilds the entire request body from a full valid set of values, minus whichever field that row names — since a data file can vary a value, but not which keys are present in a static Postman request body. Verified live (including cleaning up along the way) that every row really does 400 before any account is created — none of these 11 requests ever touches real data.
+
+#### Why not every parameterized endpoint got a DDT folder
+
+| Endpoint | Parameters | Treatment |
+|---|---|---|
+| 5/6 `searchProduct` | 1 (search term) | **DDT** — static catalog, rich distinct outcomes per input |
+| 7/8/10 `verifyLogin` | 2 (email, password) | **DDT** — matching needs both fields, so garbage input is safe and predictable |
+| 11 `createAccount` | 16 | **DDT** (missing-field matrix only) — any *present-but-weird* value (bad email format, XSS in a name field, etc.) just succeeds and creates a real account, confirmed live; only the missing-required-field case is both safe and deterministic |
+| 12 `deleteAccount` | 2 (email, password) | One ordinary test (`12b`, non-existent account → `404`) — a broader garbage-input matrix would just re-prove the same "needs both fields to match" conclusion `DDT: Verify Login` already establishes |
+| 13 `updateAccount` | 16 | One ordinary test (`13b`, non-existent account → `404`) — same reasoning as 12; it also validates in a different *order* than createAccount (checks email/password are present, then account existence, before any other field), discovered while investigating this |
+| 14 `getUserDetailByEmail` | 1 (email) | Two ordinary tests (`14b` missing param, `14c` non-existent email), **not** DDT — discovered live that "garbage" emails (`""`, `"notanemail"`, even `"<script>alert(1)</script>"`) can be **real, pre-existing accounts** other people registered on this shared public demo site, complete with their name and address. A single-field lookup like this can't safely use made-up "equivalence class" strings the way a two-field check (login) can — the expected outcome isn't under this test suite's control, since anyone else using the site can register a new "garbage" email at any time. |
+| 1–4, 9 (products/brands list, method checks) | none | Nothing to parameterize — no request body or query, just an endpoint and an HTTP method |
+
+**Adding another DDT scenario:** this collection follows the common Postman pattern of one folder per scenario, each with its own data file and its own Newman invocation (Newman only accepts a single `-d` file per run, so scenarios with different datasets can't share one command). Add a `api-tests/data/<scenario>.json` file, a matching folder + numbered request in the collection, and a dedicated `test:api:data:<scenario>` npm script (plus a CI step, if it should run there too). If the folder's default case would duplicate an existing numbered request's happy path, leave it out of the default `test:api` run, same as here — and check first (live, not by assumption) whether the endpoint's "negative" inputs are actually safe and deterministic to automate, the way `getUserDetailByEmail` above turned out not to be.
 
 ## UI Tests
 
