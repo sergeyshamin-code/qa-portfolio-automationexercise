@@ -336,6 +336,277 @@
             }
           },
           "response": []
+        },
+        {
+          "name": "14b. GET user account detail without email parameter (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP transport status is 200', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test('responseCode in body is 400', () => pm.expect(body.responseCode).to.eql(400));",
+                  "pm.test('message contains \"email parameter is missing\"', () => pm.expect(body.message).to.include('email parameter is missing'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/getUserDetailByEmail",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "getUserDetailByEmail"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "14c. GET user account detail by non-existent email (404)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// A freshly-generated, run-unique email, never an existing account's —",
+                  "// unlike a hardcoded or \"garbage-looking\" string, which (confirmed live)",
+                  "// can coincidentally BE a real user's email on this shared public site.",
+                  "pm.collectionVariables.set('nonexistent_email', 'ae_notfound_' + Date.now() + '@example.com');"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP transport status is 200', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test('responseCode in body is 404', () => pm.expect(body.responseCode).to.eql(404));",
+                  "pm.test('message contains \"Account not found\"', () => pm.expect(body.message).to.include('Account not found'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/getUserDetailByEmail?email={{nonexistent_email}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "getUserDetailByEmail"
+              ],
+              "query": [
+                {
+                  "key": "email",
+                  "value": "{{nonexistent_email}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "13b. PUT METHOD To Update Non-Existent Account (404)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// A freshly-generated, run-unique email — guaranteed never to match a real account.",
+                  "pm.collectionVariables.set('nonexistent_update_email', 'ae_update_notfound_' + Date.now() + '@example.com');"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP transport status is 200', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test('responseCode in body is 404', () => pm.expect(body.responseCode).to.eql(404));",
+                  "pm.test('message contains \"Account not found\"', () => pm.expect(body.message).to.include('Account not found'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "name",
+                  "value": "QA Tester",
+                  "type": "text"
+                },
+                {
+                  "key": "email",
+                  "value": "{{nonexistent_update_email}}",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "Test@12345",
+                  "type": "text"
+                },
+                {
+                  "key": "title",
+                  "value": "Mr",
+                  "type": "text"
+                },
+                {
+                  "key": "birth_date",
+                  "value": "1",
+                  "type": "text"
+                },
+                {
+                  "key": "birth_month",
+                  "value": "January",
+                  "type": "text"
+                },
+                {
+                  "key": "birth_year",
+                  "value": "1990",
+                  "type": "text"
+                },
+                {
+                  "key": "firstname",
+                  "value": "Test",
+                  "type": "text"
+                },
+                {
+                  "key": "lastname",
+                  "value": "User",
+                  "type": "text"
+                },
+                {
+                  "key": "company",
+                  "value": "QA",
+                  "type": "text"
+                },
+                {
+                  "key": "address1",
+                  "value": "1 Test St",
+                  "type": "text"
+                },
+                {
+                  "key": "address2",
+                  "value": "Apt 1",
+                  "type": "text"
+                },
+                {
+                  "key": "country",
+                  "value": "Canada",
+                  "type": "text"
+                },
+                {
+                  "key": "zipcode",
+                  "value": "12345",
+                  "type": "text"
+                },
+                {
+                  "key": "state",
+                  "value": "Ontario",
+                  "type": "text"
+                },
+                {
+                  "key": "city",
+                  "value": "Toronto",
+                  "type": "text"
+                },
+                {
+                  "key": "mobile_number",
+                  "value": "123456789",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/updateAccount",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "updateAccount"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "12b. DELETE METHOD To Delete Non-Existent Account (404)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// A freshly-generated, run-unique email — guaranteed never to match a real account.",
+                  "pm.collectionVariables.set('nonexistent_delete_email', 'ae_delete_notfound_' + Date.now() + '@example.com');"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP transport status is 200', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test('responseCode in body is 404', () => pm.expect(body.responseCode).to.eql(404));",
+                  "pm.test('message contains \"Account not found\"', () => pm.expect(body.message).to.include('Account not found'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "email",
+                  "value": "{{nonexistent_delete_email}}",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "whatever",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/deleteAccount",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "deleteAccount"
+              ]
+            }
+          },
+          "response": []
         }
       ]
     },
@@ -823,6 +1094,138 @@
         }
       ],
       "description": "Same request, run once per row of api-tests/data/search-terms.json (newman -d). Each row also encodes its own expected outcome (expect_results), not just the input — some search terms legitimately return zero matches, and the test should say so is correct, not fail."
+    },
+    {
+      "name": "DDT: Verify Login",
+      "description": "Auth-robustness matrix for endpoints 7/10 (verifyLogin): every row is a different malformed/malicious email+password combination, and — unlike DDT: Search Product — every single one is expected to produce the same safe 404 \"User not found!\", never a crash or a different error shape. Safe to run with made-up credentials: unlike getUserDetailByEmail (keyed on email alone, which can coincidentally match a real stranger's account on this shared public site), matching here requires BOTH email AND password, so a coincidental collision is not a realistic concern.",
+      "item": [
+        {
+          "name": "7/10. POST To Verify Login — {{login_email}} / {{login_password}}",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP transport status is 200', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test('responseCode in body is 404', () => pm.expect(body.responseCode).to.eql(404));",
+                  "pm.test('message contains \"User not found!\"', () => pm.expect(body.message).to.include('User not found!'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "email",
+                  "value": "{{login_email}}",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "{{login_password}}",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/verifyLogin",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "verifyLogin"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "DDT: Create Account (missing required field)",
+      "description": "Endpoint 11 (createAccount) requires 11 of its 16 fields (verified live: name, email, password, firstname, lastname, address1, country, zipcode, state, city, mobile_number — the other 6 are optional: title, birth_date, birth_month, birth_year, company, address2). One row per required field, each omitting a DIFFERENT one via the pre-request script, which rebuilds the request body from a full valid set minus that field. Every row is expected to 400 before any account is created — verified live and via Newman (including automatic cleanup during verification) that none of these rows ever actually create an account.",
+      "item": [
+        {
+          "name": "11. POST To Create/Register User Account — missing {{missing_field}}",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const missingField = pm.iterationData.get('missing_field');",
+                  "",
+                  "const allFields = {",
+                  "  name: 'QA Tester',",
+                  "  email: 'ae_ddt_create_' + Date.now() + '@example.com',",
+                  "  password: 'Test@12345',",
+                  "  title: 'Mr',",
+                  "  birth_date: '1',",
+                  "  birth_month: 'January',",
+                  "  birth_year: '1990',",
+                  "  firstname: 'Test',",
+                  "  lastname: 'User',",
+                  "  company: 'QA',",
+                  "  address1: '1 Test St',",
+                  "  address2: 'Apt 1',",
+                  "  country: 'Canada',",
+                  "  zipcode: '12345',",
+                  "  state: 'Ontario',",
+                  "  city: 'Toronto',",
+                  "  mobile_number: '123456789',",
+                  "};",
+                  "",
+                  "delete allFields[missingField];",
+                  "",
+                  "pm.request.body.urlencoded.clear();",
+                  "for (const [key, value] of Object.entries(allFields)) {",
+                  "  pm.request.body.urlencoded.add({ key, value });",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP transport status is 200', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test('responseCode in body is 400', () => pm.expect(body.responseCode).to.eql(400));",
+                  "const missingField = pm.iterationData.get('missing_field');",
+                  "pm.test(`message says \\\"${missingField}\\\" is missing`, () => pm.expect(body.message).to.include(`${missingField} parameter is missing`));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": []
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/createAccount",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "createAccount"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
     }
   ],
   "variable": [
@@ -849,6 +1252,14 @@
     {
       "key": "expect_results",
       "value": "true"
+    },
+    {
+      "key": "login_email",
+      "value": "nobody_qa_probe@example.com"
+    },
+    {
+      "key": "login_password",
+      "value": "wrong-password"
     }
   ]
 }

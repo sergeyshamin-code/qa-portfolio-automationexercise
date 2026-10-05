@@ -1,0 +1,13 @@
+[
+  { "missing_field": "name" },
+  { "missing_field": "email" },
+  { "missing_field": "password" },
+  { "missing_field": "firstname" },
+  { "missing_field": "lastname" },
+  { "missing_field": "address1" },
+  { "missing_field": "country" },
+  { "missing_field": "zipcode" },
+  { "missing_field": "state" },
+  { "missing_field": "city" },
+  { "missing_field": "mobile_number" }
+]

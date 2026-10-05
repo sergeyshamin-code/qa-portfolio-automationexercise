@@ -1,0 +1,10 @@
+[
+  { "login_email": "nobody_qa_probe_xyz@example.com", "login_password": "whatever123" },
+  { "login_email": "nobody@example.com", "login_password": "" },
+  { "login_email": "", "login_password": "something" },
+  { "login_email": "' OR '1'='1", "login_password": "x" },
+  { "login_email": "<script>alert(1)</script>", "login_password": "x" },
+  { "login_email": "nobody@example.com", "login_password": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" },
+  { "login_email": "платье@example.com", "login_password": "пароль" },
+  { "login_email": "  nobody@example.com  ", "login_password": "x" }
+]

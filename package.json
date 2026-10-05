@@ -6,7 +6,9 @@
     "test:api": "newman run api-tests/AutomationExercise.postman_collection.json -e api-tests/AutomationExercise.postman_environment.json --folder \"Read-only endpoints\" --folder \"User account lifecycle\" -r cli,htmlextra,json --reporter-htmlextra-export api-tests/newman-reports/report.html --reporter-json-export api-tests/newman-reports/report.json",
     "test:ui": "playwright test",
     "test:ui:report": "playwright show-report",
-    "test:api:data": "newman run api-tests/AutomationExercise.postman_collection.json -e api-tests/AutomationExercise.postman_environment.json --folder \"DDT: Search Product\" -d api-tests/data/search-terms.json -r cli,json --reporter-json-export api-tests/newman-reports/report-data.json"
+    "test:api:data": "newman run api-tests/AutomationExercise.postman_collection.json -e api-tests/AutomationExercise.postman_environment.json --folder \"DDT: Search Product\" -d api-tests/data/search-terms.json -r cli,json --reporter-json-export api-tests/newman-reports/report-data.json",
+    "test:api:data:login": "newman run api-tests/AutomationExercise.postman_collection.json -e api-tests/AutomationExercise.postman_environment.json --folder \"DDT: Verify Login\" -d api-tests/data/verify-login.json -r cli,json --reporter-json-export api-tests/newman-reports/report-data-login.json",
+    "test:api:data:create-account": "newman run api-tests/AutomationExercise.postman_collection.json -e api-tests/AutomationExercise.postman_environment.json --folder \"DDT: Create Account (missing required field)\" -d api-tests/data/create-account-missing-field.json -r cli,json --reporter-json-export api-tests/newman-reports/report-data-create-account.json"
   },
   "repository": {
     "type": "git",

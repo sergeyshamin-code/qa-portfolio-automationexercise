@@ -88,7 +88,11 @@ if (mode === 'api') {
   output =
     newmanSection('api-tests/newman-reports/report.json', 'API tests') +
     '\n' +
-    newmanSection('api-tests/newman-reports/report-data.json', 'API tests — data-driven (DDT)');
+    newmanSection('api-tests/newman-reports/report-data.json', 'API tests — DDT: Search Product') +
+    '\n' +
+    newmanSection('api-tests/newman-reports/report-data-login.json', 'API tests — DDT: Verify Login') +
+    '\n' +
+    newmanSection('api-tests/newman-reports/report-data-create-account.json', 'API tests — DDT: Create Account');
 } else if (mode === 'ui') {
   output = playwrightSection('playwright-report/results.json', 'UI tests (Playwright)');
 } else {
