@@ -5,3 +5,7 @@ api-tests/newman-reports/*
 playwright-report/
 test-results/
 .DS_Store
+
+# Claude Code local state
+.claude/scheduled_tasks.lock
+.claude/settings.local.json
